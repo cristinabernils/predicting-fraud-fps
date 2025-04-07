@@ -21,37 +21,37 @@ In this phase, we explore the structure and distribution of the data:
 
 ---
 
-## 2. ✂️ Filtering Relevant Transactions
+## 2. 🧱 Data Preparation & Feature Engineering
 
-From the analysis, we observe that fraud only occurs in the following transaction types:
+After exploration, we prepare the dataset and create features that reflect behavioral fraud patterns:
 
+### 🔍 Transaction Filtering
+
+Fraud only occurs in the following transaction types:
 - `TRANSFER`
 - `CASH_OUT`
 
-Thus, the other types (`PAYMENT`, `DEBIT`, `CASH_IN`) are filtered out to reduce noise and improve model precision.
+Other types (`PAYMENT`, `DEBIT`, `CASH_IN`) are filtered out to reduce noise and focus on high-risk patterns.
+
+### 🛠️ Feature Engineering Highlights
+
+- **Balance errors**  
+  `errorBalanceOrig`, `errorBalanceDest` → Detect inconsistencies in transaction math.
+  
+- **Binary balance flags**  
+  e.g., `orig_balance_zero_before`, `is_orig_emptied` → Indicators of suspicious states.
+
+- **Amount-to-balance ratio**  
+  e.g., `amount_to_balance_ratio` → Spot transactions disproportionately large.
+
+- **Outlier detection**  
+  Using `z-score` to flag anomalous transfers.
+
+These variables aim to simulate the behavior fraudsters attempt to hide — such as draining an account or sending money without sufficient balance.
 
 ---
 
-## 3. 🛠️ Feature Engineering
-
-Additional features are created to enhance the model’s learning capacity:
-
-- **Balance errors**: `errorBalanceOrig`, `errorBalanceDest`  
-  → Detect accounting inconsistencies.
-
-- **Binary balance flags**:  
-  → e.g., `orig_balance_zero_before`, `is_orig_emptied`.
-
-- **Amount-to-balance ratio**:  
-  → `amount_to_balance_ratio`
-
-- **Outlier detection** using `z-score` on transaction amount.
-
-These features help capture hidden patterns that fraudsters may try to mask.
-
----
-
-## 4. ⚖️ Class Balancing with SMOTETomek
+## 3. ⚖️ Class Balancing with SMOTETomek
 
 Given the extreme imbalance (fraud < 1%):
 
@@ -60,17 +60,19 @@ Given the extreme imbalance (fraud < 1%):
 
 ---
 
-## 5. 🤖 Model Training (Random Forest)
+## 4. 🤖 Model Training
 
-A **RandomForestClassifier** is trained using:
+We train multiple models to compare approaches:
 
-- Balanced class weights (`class_weight='balanced'`)
-- Balanced dataset via SMOTETomek
-- Evaluation metrics: Precision, Recall, F1-Score, ROC AUC
+- **Logistic Regression** (baseline)
+- **Random Forest** (ensemble, `class_weight='balanced'`)
+- **XGBoost** (with `scale_pos_weight`)
+
+Each model is trained using the engineered features and evaluated on real-world class imbalance scenarios.
 
 ---
 
-## 6. 📊 Results Analysis
+## 5. 📊 Results Analysis
 
 ### 🧪 Model Evaluation
 
@@ -90,7 +92,7 @@ The most important features are visualized, including:
 - `errorBalanceOrig`
 - `is_orig_emptied`, etc.
 
-These insights help interpret how the model detects fraud.
+These insights help interpret how the model detects fraud based on behavioral signals.
 
 ---
 
